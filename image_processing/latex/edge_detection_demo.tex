@@ -281,7 +281,7 @@
 
 
     \hypertarget{quantum-edge-detection}{%
-\section{Quantum Edge Detection}\label{quantum-edge-detection}}
+\section{Introduction}\label{quantum-edge-detection}}
 
 This demonstration shows how to use \href{https://qiskit.org/}{Qiskit™}
 to perform edge detection in images with the quantum Hadamard edge
@@ -290,14 +290,13 @@ operation, independent of the size of the image, illustrating the
 potential of quantum image processing for highly efficient image and
 video processing.
 
-\begin{figure}
+\begin{figure}[h]
 \centering
 \includegraphics{../img/edge.png}
-\caption{noimg}
 \end{figure}
 
     \hypertarget{what-indicates-an-edge}{%
-\subsection{What indicates an edge?}\label{what-indicates-an-edge}}
+\section{What indicates an edge?}\label{what-indicates-an-edge}}
 
     Consider the following row of pixels called \(\alpha\):
 
@@ -306,7 +305,6 @@ video processing.
 \begin{figure}[h]
 \centering
 \includegraphics{../img/p.png}
-\caption{$\alpha$}
 \end{figure}
 
 and the difference of its nearest neighboring pixels called
@@ -319,7 +317,6 @@ and the difference of its nearest neighboring pixels called
 \begin{figure}[h]
 \centering
 \includegraphics{../img/dp.png}
-\caption{$\Delta\alpha$}
 \end{figure}
 
 The differences \(\Delta \alpha\) take on non-zero values where there
@@ -328,7 +325,7 @@ are changes (edges) in the original image \(\alpha\).
 So, \(\Delta \alpha\) indicates edges in \(\alpha\).
 
     \hypertarget{the-hadamard-quantum-gate}{%
-\subsection{The Hadamard Quantum Gate}\label{the-hadamard-quantum-gate}}
+\section{The Hadamard Quantum Gate}\label{the-hadamard-quantum-gate}}
 
     The Hadamard gate has the following effect on the zero and one basis
 states of a qubit:
@@ -372,15 +369,14 @@ This is a clue that the Hadamard quantum gate can be used to indicate
 edges in an image.
 
     \hypertarget{representing-an-image-as-a-state-vector}{%
-\subsection{Representing an image as a state
+\section{Representing an image as a state
 vector}\label{representing-an-image-as-a-state-vector}}
 
     Represent the image as a quantum state as follows
 
-\begin{figure}
+\begin{figure}[h]
 \centering
 \includegraphics{../img/quantum_encoding.png}
-\caption{no\_img}
 \end{figure}
 
     The image begins as a matrix of values at certain pixel positions.
@@ -393,7 +389,7 @@ system:
 \[|\textrm{image}\rangle = \frac{0.2 |00\rangle + 0.8 |01\rangle + 0.7 |10\rangle + 0.3 |11\rangle}{\sqrt{0.2^2 + 0.8^2 + 0.7^2 + 0.3^2}}\]
 
     \hypertarget{programming-the-encoding}{%
-\subsection{Programming the encoding}\label{programming-the-encoding}}
+\section{Programming the encoding}\label{programming-the-encoding}}
 
 Read the example image in and display it. Get the first color channel of
 the image and \texttt{ravel} it to form a column vector.
@@ -464,11 +460,11 @@ the image is
     \begin{figure}
 \centering
 \includegraphics{../img/circ.png}
-\caption{circ}
+\caption{The circuit for a 4x4 image.}
 \end{figure}
 
     \hypertarget{the-hadamard-gate-with-more-than-2-pixels}{%
-\subsection{The Hadamard gate with more than 2
+\section{The Hadamard gate with more than 2
 pixels}\label{the-hadamard-gate-with-more-than-2-pixels}}
 
     Recall that the Hadamard gate has the following effect on the zero and
@@ -509,8 +505,8 @@ state down to one proportional to
 which holds just the edge information we're interested in.
 
     \hypertarget{implementing-the-algorithm}{%
-\subsection{Implementing the
-Algorithm}\label{implementing-the-algorithm}}
+\section{Implementing the
+algorithm}\label{implementing-the-algorithm}}
 
 Beginning with the circuit \texttt{circ} that generates the image's
 state vector representation, apply the Hadamard gate to \emph{just} the
@@ -541,8 +537,8 @@ the resulting state vector.
 
 
     \hypertarget{decode-the-state-vector-back-into-an-image}{%
-\subsection{Decode the State Vector Back into an
-Image}\label{decode-the-state-vector-back-into-an-image}}
+\section{Decode the state vector back into an
+image}\label{decode-the-state-vector-back-into-an-image}}
 
     To turn the state vector back into an image, read off the \(\alpha\)'s
 and reshape the column vector back into a matrix.
