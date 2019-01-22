@@ -13,6 +13,7 @@
 \documentclass[11pt]{article}
 
     
+    
     \usepackage[T1]{fontenc}
     % Nicer default font (+ math font) than Computer Modern for most use cases
     \usepackage{mathpazo}
@@ -142,7 +143,7 @@
     % Document parameters
     \title{Quantum Edge Detection Demo}
     \author{Paul Kassebaum}
-    
+   
     
     
 
@@ -277,8 +278,6 @@
     
     \maketitle
     
-    
-
 
 
     \hypertarget{quantum-edge-detection}{%
@@ -293,96 +292,148 @@ video processing.
 
 \begin{figure}
 \centering
-\includegraphics{./edge.png}
+\includegraphics{../img/edge.png}
+\caption{noimg}
 \end{figure}
 
-    Read the example image in and display it.
+    \hypertarget{what-indicates-an-edge}{%
+\subsection{What indicates an edge?}\label{what-indicates-an-edge}}
+
+    Consider the following row of pixels called \(\alpha\):
+
+\[\alpha = [0, 0, 0, 1, 1, 1, 0, 0, 0],\]
+
+\begin{figure}[h]
+\centering
+\includegraphics{../img/p.png}
+\caption{$\alpha$}
+\end{figure}
+
+and the difference of its nearest neighboring pixels called
+\(\Delta \alpha\)
+
+\[\Delta \alpha = [\alpha_1-\alpha_0, \alpha_2-\alpha_1, \ldots, \alpha_n-\alpha_{n-1},\alpha_0-\alpha_n]\]
+
+\[\Delta \alpha = [0,0,1,0,0,-1,0,0,0]\]
+
+\begin{figure}[h]
+\centering
+\includegraphics{../img/dp.png}
+\caption{$\Delta\alpha$}
+\end{figure}
+
+The differences \(\Delta \alpha\) take on non-zero values where there
+are changes (edges) in the original image \(\alpha\).
+
+So, \(\Delta \alpha\) indicates edges in \(\alpha\).
+
+    \hypertarget{the-hadamard-quantum-gate}{%
+\subsection{The Hadamard Quantum Gate}\label{the-hadamard-quantum-gate}}
+
+    The Hadamard gate has the following effect on the zero and one basis
+states of a qubit:
+
+\(H|0\rangle \rightarrow (|0\rangle + |1\rangle)/\sqrt{2}\)
+
+\(H|1\rangle \rightarrow (|0\rangle - |1\rangle)/\sqrt{2}\)
+
+Consider a two pixel image that we represent with a single qubit:
+
+\[|\textrm{image}\rangle = \alpha_0 |0\rangle + \alpha_1 |1\rangle\]
+
+where \(\alpha_0\) is proportional to the value of pixel 0, \(\alpha_1\)
+is proportional to the value of pixel 1. The \(\alpha\)'s now also tell
+us the probabilty of finding the qubit in state \(|0\rangle\) or
+\(|1\rangle\) when we measure it. We will find the qubit in state
+\(|0\rangle\) with a probabilty of \(\alpha_0^2\), or in the state
+\(|1\rangle\) with probability \(\alpha_1^2\).
+
+    When we apply the Hadamard quantum gate to the image state, it gets
+transformed into a new state as follows:
+
+\[H|\textrm{image}\rangle = H \alpha_0 |0\rangle + H \alpha_1 |1\rangle\]
+
+\[H|\textrm{image}\rangle = \alpha_0 H |0\rangle + \alpha_1 H |1\rangle\]
+
+\[H|\textrm{image}\rangle = \alpha_0 (|0\rangle + |1\rangle)/\sqrt{2} + \alpha_1 (|0\rangle - |1\rangle)/\sqrt{2}\]
+
+\[H|\textrm{image}\rangle =  \frac{1}{\sqrt{2}}\left[(\alpha_0 + \alpha_1)|0\rangle + (\alpha_0 - \alpha_1)|1\rangle)\right]\]
+
+Now if we measure the qubit, the probabilty of finding it in state
+\(|0\rangle\) is \(P(0) = (\alpha_0 + \alpha_1)^2/2\) and the
+probability of finding it in state \(|1\rangle\) is
+\(P(1) = (\alpha_0 - \alpha_1)^2/2\).
+
+If the two pixels have the same value, then \(\alpha_0 - \alpha_1 = 0\),
+so \(P(1) = 0\). If the two pixels have different values, then
+\(P(1) > 0\).
+
+This is a clue that the Hadamard quantum gate can be used to indicate
+edges in an image.
+
+    \hypertarget{representing-an-image-as-a-state-vector}{%
+\subsection{Representing an image as a state
+vector}\label{representing-an-image-as-a-state-vector}}
+
+    Represent the image as a quantum state as follows
+
+\begin{figure}
+\centering
+\includegraphics{../img/quantum_encoding.png}
+\caption{no\_img}
+\end{figure}
+
+    The image begins as a matrix of values at certain pixel positions.
+Unravel the matrices to form vectors. Then rewrite the pixel positions
+from decimal to binary.
+
+The image can then be represented as the quantum state of a two qubit
+system:
+
+\[|\textrm{image}\rangle = \frac{0.2 |00\rangle + 0.8 |01\rangle + 0.7 |10\rangle + 0.3 |11\rangle}{\sqrt{0.2^2 + 0.8^2 + 0.7^2 + 0.3^2}}\]
+
+    \hypertarget{programming-the-encoding}{%
+\subsection{Programming the encoding}\label{programming-the-encoding}}
+
+Read the example image in and display it. Get the first color channel of
+the image and \texttt{ravel} it to form a column vector.
 
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
         \PY{k+kn}{from} \PY{n+nn}{numpy} \PY{k}{import} \PY{n}{pi}
         \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
         \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{image}  \PY{k}{as} \PY{n+nn}{mpimg}
+        \PY{k+kn}{from} \PY{n+nn}{skimage}\PY{n+nn}{.}\PY{n+nn}{transform} \PY{k}{import} \PY{n}{resize}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{filename} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{./schrodin\PYZus{}yang.png}\PY{l+s+s1}{\PYZsq{}}
+{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{filename} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../img/schrodin\PYZus{}yang.png}\PY{l+s+s1}{\PYZsq{}}
         \PY{n}{im} \PY{o}{=} \PY{n}{mpimg}\PY{o}{.}\PY{n}{imread}\PY{p}{(}\PY{n}{filename}\PY{p}{)}
-        \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{p}{)}
-        \PY{n}{ax}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{im}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}2}]:} <matplotlib.image.AxesImage at 0x11a75aa90>
-\end{Verbatim}
-            
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_4_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    If necessary, shrink the image to make the rest of the demonstration run
-faster.
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}3}]:} \PY{k+kn}{from} \PY{n+nn}{skimage}\PY{n+nn}{.}\PY{n+nn}{transform} \PY{k}{import} \PY{n}{resize}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}4}]:} \PY{n}{n\PYZus{}pixels} \PY{o}{=} \PY{l+m+mi}{2}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{5}
+        
+        \PY{n}{n\PYZus{}pixels} \PY{o}{=} \PY{l+m+mi}{2}\PY{o}{*}\PY{o}{*}\PY{l+m+mi}{5}
         \PY{n}{im} \PY{o}{=} \PY{n}{resize}\PY{p}{(}\PY{n}{im}\PY{p}{,} \PY{p}{(}\PY{n}{n\PYZus{}pixels}\PY{p}{,} \PY{n}{n\PYZus{}pixels}\PY{p}{)}\PY{p}{)}
+        
+        \PY{n}{data} \PY{o}{=} \PY{n}{im}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{ravel}\PY{p}{(}\PY{p}{)}
+        
         \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{p}{)}
         \PY{n}{ax}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{im}\PY{p}{)}
 \end{Verbatim}
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}4}]:} <matplotlib.image.AxesImage at 0x81c0fcba8>
+{\color{outcolor}Out[{\color{outcolor}2}]:} <matplotlib.image.AxesImage at 0x1c21decdd8>
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_7_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../img/output_12_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
-    \hypertarget{representing-the-image-as-a-state-vector}{%
-\subsection{Representing the Image as a State
-Vector}\label{representing-the-image-as-a-state-vector}}
-
-    Represent the image as a quantum state as follows
-
-\begin{figure}[h]
-\centering
-\includegraphics{./quantum_encoding.png}
-\end{figure}
-
-    The image begins as a matrix of values at certain pixel positions.
-Unravel the matrices to form vectors. Then translate the pixel positions
-from decimal to binary.
-
-The image can then be represented as the quantum state
-
-\[|\textrm{image}\rangle = \frac{0.2 |00\rangle + 0.8 |01\rangle + 0.7 |10\rangle + 0.3 |11\rangle}{\sqrt{0.2^2 + 0.8^2 + 0.7^2 + 0.3^2}},\]
-
-or in general, \( \textbar{}\textrm{image}\rangle = \sum_k \alpha_k \textbar{}k\rangle \), where the basis state \(|k\rangle\) encodes the
-position of each pixel and the amplitude \(\alpha_k\) encodes the pixel
-value.
-
-    Get the first color channel of the image and \texttt{ravel} it to form a
-1-D vector.
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}5}]:} \PY{n}{data} \PY{o}{=} \PY{n}{im}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{ravel}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
     Use Qiskit Aqua to encode the image as a quantum state.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}6}]:} \PY{n}{n\PYZus{}qubits}   \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{int\PYZus{}}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{log2}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{data}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}4}]:} \PY{n}{n\PYZus{}qubits} \PY{o}{=} \PY{n+nb}{int}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{log2}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{data}\PY{p}{)}\PY{p}{)}\PY{p}{)}
         
         \PY{k+kn}{from} \PY{n+nn}{qiskit\PYZus{}aqua}\PY{n+nn}{.}\PY{n+nn}{components}\PY{n+nn}{.}\PY{n+nn}{initial\PYZus{}states} \PY{k}{import} \PY{n}{Custom}
         \PY{n}{init\PYZus{}state} \PY{o}{=} \PY{n}{Custom}\PY{p}{(}\PY{n}{n\PYZus{}qubits}\PY{p}{,} \PY{n}{state\PYZus{}vector}\PY{o}{=}\PY{n}{data}\PY{p}{)}
@@ -397,30 +448,45 @@ modified by quantum gates to end up in the state that represents the
 image, \(|\textrm{image}\rangle\).
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}7}]:} \PY{n}{circ} \PY{o}{=} \PY{n}{init\PYZus{}state}\PY{o}{.}\PY{n}{construct\PYZus{}circuit}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{circuit}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}5}]:} \PY{n}{circ} \PY{o}{=} \PY{n}{init\PYZus{}state}\PY{o}{.}\PY{n}{construct\PYZus{}circuit}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{circuit}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
         \PY{n}{qr}   \PY{o}{=} \PY{n}{circ}\PY{o}{.}\PY{n}{qregs}
-        \PY{c+c1}{\PYZsh{}circ.draw()}
 \end{Verbatim}
 
 
-    \hypertarget{how-the-quantum-hadamard-edge-detection-algorithm-works}{%
-\subsection{How the Quantum Hadamard Edge Detection Algorithm
-Works}\label{how-the-quantum-hadamard-edge-detection-algorithm-works}}
+    The series of quantum gates (the quantum circuit) for a 4x4 version of
+the image is
 
-    The Hadamard gate has the following effect on the zero and one basis
-states:
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}6}]:} \PY{c+c1}{\PYZsh{} circ.draw()}
+\end{Verbatim}
+
+
+    \begin{figure}
+\centering
+\includegraphics{../img/circ.png}
+\caption{circ}
+\end{figure}
+
+    \hypertarget{the-hadamard-gate-with-more-than-2-pixels}{%
+\subsection{The Hadamard gate with more than 2
+pixels}\label{the-hadamard-gate-with-more-than-2-pixels}}
+
+    Recall that the Hadamard gate has the following effect on the zero and
+one basis states:
 
 \(H|0\rangle \rightarrow (|0\rangle + |1\rangle)/\sqrt{2}\)
 
 \(H|1\rangle \rightarrow (|0\rangle - |1\rangle)/\sqrt{2}\)
 
-Consider a four pixel image and what happens when a Hadamard gate is
-applied to the last qubit. We'll subscript the Hadamard operator to tell
-which qubit it's acting on.
+Consider a four pixel image, represented with two qubits, and what
+happens when a Hadamard gate is applied to just the last qubit. We'll
+subscript the Hadamard operator to tell which qubit it's acting on.
 
 \[ |\textrm{image}\rangle = \alpha_{00}|00\rangle + \alpha_{01}|01\rangle + \alpha_{10}|10\rangle + \alpha_{11}|11\rangle \]
 
 \[ |\textrm{image}\rangle = \alpha_{00}|0\rangle|0\rangle + \alpha_{01}|0\rangle|1\rangle + \alpha_{10}|1\rangle|0\rangle + \alpha_{11}|1\rangle|1\rangle \]
+
+\[ \sqrt{2} H_0 |\textrm{image}\rangle = \alpha_{00}|0\rangle \sqrt{2} H |0\rangle + \alpha_{01}|0\rangle \sqrt{2} H|1\rangle + \alpha_{10}|1\rangle \sqrt{2} H|0\rangle + \alpha_{11}|1\rangle\sqrt{2} H|1\rangle\]
 
 \[ \sqrt{2} H_0 |\textrm{image}\rangle = \alpha_{00}|0\rangle(|0\rangle + |1\rangle) + \alpha_{01}|0\rangle(|0\rangle - |1\rangle) + \alpha_{10}|1\rangle(|0\rangle + |1\rangle) + \alpha_{11}|1\rangle(|0\rangle - |1\rangle)\]
 
@@ -430,20 +496,13 @@ which qubit it's acting on.
 
     \[ \sqrt{2} H_0 |\textrm{image}\rangle = (\alpha_{00} + \alpha_{01})|00\rangle + (\alpha_{00} - \alpha_{01})|01\rangle + (\alpha_{10} + \alpha_{11})|10\rangle + (\alpha_{10} - \alpha_{11})|11\rangle \]
 
-The terms with the difference of neighboring pixel values tell us
-information about the image's edges. Here's why. Consider the following
-row of pixels called \(p\) and the difference of its neighboring pixels
-called \(\Delta p\):
-
-\[p = [0, 0, 0, 1, 1, 1, 0, 0, 0]\]
-
-\[\Delta p = [p(1)-p(0), p(2)-p(1), \ldots] = [0,0,1,0,0,-1,0,0]\]
-
-The neighboring differences \(\Delta p\) take on non-zero values where
-there are changes (edges) in the original image \(p\).
-
-If we measure the state of the first qubit, and the result is \(1\),
-then the state will have collapsed into the final state proportional to
+What happens to the state above if we measure just the state of the
+first qubit and happen to get the result \(1\)? The state of the second
+qubit will still be undetermined, but the system's overall state vector
+would be made up of only those states consistent with our first
+measurement: \(|01\rangle\) and \(|11\rangle\). So, if the first
+measurement results in a 1, it must shrink, or \emph{collapse}, the
+state down to one proportional to
 
 \[ |\textrm{final state}\rangle = (\alpha_{00} - \alpha_{01})|01\rangle + (\alpha_{10} - \alpha_{11})|11\rangle \]
 
@@ -454,29 +513,30 @@ which holds just the edge information we're interested in.
 Algorithm}\label{implementing-the-algorithm}}
 
 Beginning with the circuit \texttt{circ} that generates the image's
-state vector representation, apply the Hadamard gate to the first qubit.
+state vector representation, apply the Hadamard gate to \emph{just} the
+first qubit.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}8}]:} \PY{n}{circ}\PY{o}{.}\PY{n}{h}\PY{p}{(}\PY{n}{qr}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}7}]:} \PY{n}{circ}\PY{o}{.}\PY{n}{h}\PY{p}{(}\PY{n}{qr}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
 \end{Verbatim}
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}8}]:} <qiskit.extensions.standard.h.HGate at 0x1c21a15048>
+{\color{outcolor}Out[{\color{outcolor}7}]:} <qiskit.extensions.standard.h.HGate at 0x1c25585358>
 \end{Verbatim}
             
     Simulate the circuit using the \texttt{StatevectorSimulator} and read
 the resulting state vector.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}9}]:} \PY{k+kn}{from} \PY{n+nn}{qiskit} \PY{k}{import} \PY{n}{BasicAer}\PY{p}{,} \PY{n}{execute}
+{\color{incolor}In [{\color{incolor}8}]:} \PY{k+kn}{from} \PY{n+nn}{qiskit} \PY{k}{import} \PY{n}{BasicAer}\PY{p}{,} \PY{n}{execute}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}10}]:} \PY{n}{simulator} \PY{o}{=} \PY{n}{BasicAer}\PY{o}{.}\PY{n}{get\PYZus{}backend}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{statevector\PYZus{}simulator}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{result} \PY{o}{=} \PY{n}{execute}\PY{p}{(}\PY{n}{circ}\PY{p}{,} \PY{n}{simulator}\PY{p}{)}\PY{o}{.}\PY{n}{result}\PY{p}{(}\PY{p}{)}
-         \PY{n}{final\PYZus{}state\PYZus{}vector} \PY{o}{=} \PY{n}{result}\PY{o}{.}\PY{n}{get\PYZus{}statevector}\PY{p}{(}\PY{n}{circ}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{simulator}   \PY{o}{=} \PY{n}{BasicAer}\PY{o}{.}\PY{n}{get\PYZus{}backend}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{statevector\PYZus{}simulator}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{sim\PYZus{}result}  \PY{o}{=} \PY{n}{execute}\PY{p}{(}\PY{n}{circ}\PY{p}{,} \PY{n}{simulator}\PY{p}{)}\PY{o}{.}\PY{n}{result}\PY{p}{(}\PY{p}{)}
+        \PY{n}{final\PYZus{}state} \PY{o}{=} \PY{n}{sim\PYZus{}result}\PY{o}{.}\PY{n}{get\PYZus{}statevector}\PY{p}{(}\PY{n}{circ}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -484,10 +544,14 @@ the resulting state vector.
 \subsection{Decode the State Vector Back into an
 Image}\label{decode-the-state-vector-back-into-an-image}}
 
+    To turn the state vector back into an image, read off the \(\alpha\)'s
+and reshape the column vector back into a matrix.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}11}]:} \PY{n}{edge} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{real}\PY{p}{(}\PY{n}{final\PYZus{}state\PYZus{}vector}\PY{p}{)}
-         \PY{n}{n\PYZus{}rows}    \PY{o}{=} \PY{n+nb}{int}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{edge}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-         \PY{n}{edge} \PY{o}{=} \PY{n}{edge}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{n}{n\PYZus{}rows}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}10}]:} \PY{n}{edge}   \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{real}\PY{p}{(}\PY{n}{final\PYZus{}state}\PY{p}{)}
+         \PY{n}{n\PYZus{}rows} \PY{o}{=} \PY{n+nb}{int}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{edge}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+         \PY{n}{n\PYZus{}cols} \PY{o}{=} \PY{n}{n\PYZus{}rows}
+         \PY{n}{edge}   \PY{o}{=} \PY{n}{edge}\PY{o}{.}\PY{n}{reshape}\PY{p}{(}\PY{n}{n\PYZus{}rows}\PY{p}{,} \PY{n}{n\PYZus{}cols}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -497,25 +561,25 @@ basis states are the 2-D image's even columns. To retain only these
 columns, zero out the odd columns.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}12}]:} \PY{n}{edge}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{:}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{0}
+{\color{incolor}In [{\color{incolor}11}]:} \PY{n}{edge}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{:}\PY{l+m+mi}{2}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{0}
 \end{Verbatim}
 
 
     Display the edges and the original image for comparison.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}13}]:} \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}12}]:} \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}
          \PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{edge}\PY{p}{)}
          \PY{n}{ax}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{im}\PY{p}{)}
 \end{Verbatim}
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}13}]:} <matplotlib.image.AxesImage at 0x1c21897b00>
+{\color{outcolor}Out[{\color{outcolor}12}]:} <matplotlib.image.AxesImage at 0x1c25c84e80>
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_30_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{../img/output_34_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
